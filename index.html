@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Generator with Payment Confirmation</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+    }
+    #qrcode {
+      margin: 20px auto;
+      padding: 10px;
+      background-color: #f9f9f9;
+      display: inline-block;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+    footer {
+      margin-top: 30px;
+      padding: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+    input[type="number"], button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #paymentStatus {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>QR Code Generator with Payment Confirmation</h1>
+  </header>
+
+  <div>
+    <input type="number" id="amount" placeholder="Enter amount" min="1" step="0.01">
+    <button onclick="generateQRCode()">Generate QR Code</button>
+  </div>
+
+  <div id="qrcode"></div>
+
+  <div>
+    <a href="upi://pay?pa=skrohanhsr@axl&pn=RecipientName&am=20&cu=INR" target="_blank" rel="noopener noreferrer">
+      <button style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+          Pay Now
+      </button>
+  </a>
+  
+    <button onclick="confirmPayment()">Confirm Payment</button>
+  </div>
+
+  <div id="paymentStatus"></div>
+
+  <footer>&copy; 2024 QR Code App. Built for convenience.</footer>
+
+  <script>
+    const upiAddress = "skrohanhsr@axl"; // Replace with your UPI address
+
+    function generateQRCode() {
+      const amount = document.getElementById('amount').value;
+      if (!amount || amount <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+      }
+      const address = `upi://pay?pa=${upiAddress}&pn=RecipientName&am=${amount}&cu=INR`; // Include payment details
+      const qrCodeDiv = document.getElementById('qrcode');
+
+      // Clear previous QR code
+      qrCodeDiv.innerHTML = "";
+
+      QRCode.toCanvas(document.createElement('canvas'), address, { 
+        width: 200, // Set size
+        margin: 2   // Set margin
+      }, (error, canvas) => {
+        if (error) {
+          console.error("QR code generation error:", error);
+        } else {
+          // Append the generated canvas to the QR code div
+          qrCodeDiv.appendChild(canvas);
+          console.log("QR code generated successfully!");
+        }
+      });
+    }
+
+    function confirmPayment() {
+      // Simulating payment confirmation
+      const paymentStatusDiv = document.getElementById('paymentStatus');
+      
+      // Simulate a delay for payment processing
+      paymentStatusDiv.innerText = "Processing payment...";
+      setTimeout(() => {
+        paymentStatusDiv.innerText = "Payment Successful! Thank you.";
+      }, 3000); // Simulate a 3-second delay
+    }
+  </script>
+</body>
+</html>
