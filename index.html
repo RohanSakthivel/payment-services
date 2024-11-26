@@ -4,23 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UPI Payment</title>
-    <script>
-        // Check if redirected after payment
-        function notifyPaymentSuccess() {
-            // Example: Add a query parameter to the URL (e.g., `?status=success`) after payment
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('status') === 'success') {
-                alert('Payment was successful!');
-            }
-        }
-    </script>
+    
 </head>
 <body onload="notifyPaymentSuccess()">
-    <a href="upi://pay?pa=skrohanhsr@axl&pn=RecipientName&am=1&cu=INR&redirect=true&status=success" 
-       target="_blank" rel="noopener noreferrer">
-        <button style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
-            Pay Now
-        </button>
+    <div>
+    <a href="upi://pay?pa=skrohanhsr@axl&pn=RecipientName&am=20&cu=INR">
+    <button> Payment</button> 
     </a>
+    <button onclick="confirmPayment()">Confirm Payment</button>
+  </div>
 </body>
 </html>
