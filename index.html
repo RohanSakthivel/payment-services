@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Code Generator</title>
+  <title>QR Code Generator with Message</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
   <style>
     body {
@@ -31,7 +31,7 @@
       font-size: 14px;
       color: #555;
     }
-    input[type="number"], button {
+    input[type="number"], input[type="text"], button {
       margin: 10px;
       padding: 10px;
       font-size: 16px;
@@ -49,11 +49,12 @@
 </head>
 <body>
   <header>
-    <h1>QR Code Generator</h1>
+    <h1>QR Code Generator with Message</h1>
   </header>
 
   <div>
     <input type="number" id="amount" placeholder="Enter amount" min="1" step="0.01">
+    <input type="text" id="message" placeholder="Add a message (optional)">
     <button onclick="generateQRCode()">Generate QR Code</button>
   </div>
 
@@ -63,27 +64,55 @@
 
   <script>
     const upiAddress = "skrohanhsr@axl"; // Replace with your UPI address
+    const recipientName = "RecipientName"; // Replace with recipient's name
 
     function generateQRCode() {
-      const amount = document.getElementById('amount').value;
-      const address = `upi://pay?pa=${upiAddress}&pn=RecipientName&am=${amount}&cu=INR`; // Include payment details
+      const amount = document.getElementById('amount').value.trim();
+      const message = document.getElementById('message').value.trim();
       const qrCodeDiv = document.getElementById('qrcode');
 
-      // Clear previous QR code
+      // Validate amount
+      if (!amount || amount <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+      }
+
+      // Construct UPI URL with transaction note (message)
+      const upiUrl = `upi://pay?pa=${upiAddress}&pn=${recipientName}&am=${amount}&cu=INR&tn=${encodeURIComponent(message)}`;
+
+      // Clear any previous QR code
       qrCodeDiv.innerHTML = "";
 
-      QRCode.toCanvas(document.createElement('canvas'), address, { 
+      QRCode.toCanvas(document.createElement('canvas'), upiUrl, { 
         width: 200, // Set size
         margin: 2   // Set margin
       }, (error, canvas) => {
         if (error) {
           console.error("QR code generation error:", error);
         } else {
-          // Append the generated canvas to the QR code div
+          // Append the canvas to the QR code div
           qrCodeDiv.appendChild(canvas);
           console.log("QR code generated successfully!");
         }
       });
+
+      // Simulate sending the message in parallel
+      sendMessage(message);
+    }
+
+    function sendMessage(message) {
+      if (!message) {
+        console.log("No message to send.");
+        return;
+      }
+
+      // Simulate message sending (e.g., via API)
+      console.log("Sending message:", message);
+
+      setTimeout(() => {
+        alert("Message sent: " + message);
+        console.log("Message sent successfully!");
+      }, 1000); // Simulate a delay for message sending
     }
   </script>
 </body>
