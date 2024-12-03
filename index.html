@@ -22,49 +22,127 @@
         #payButton:hover {
             background-color: #45a049;
         }
+        #statusMessage {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        #qrCodeContainer {
+            display: none;
+            margin-top: 20px;
+        }
+        #qrCodeContainer img {
+            width: 200px;
+            height: 200px;
+        }
+        #downloadButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: none;
+        }
+        #downloadButton:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
     <h1>Pay with PhonePe</h1>
     <button id="payButton">Pay Now</button>
+    <p id="statusMessage"></p>
+
+    <div id="qrCodeContainer">
+        <h2>Scan QR Code</h2>
+        <img id="qrCode" alt="QR Code for Payment">
+        <p>Use any UPI app to scan the QR code and complete the payment.</p>
+        <a id="downloadButton" download="payment_qr_code.png">Download QR Code</a>
+    </div>
 
     <script>
-        // Function to display a message after a successful payment
+        let statusInterval;
+
+        // Function to display a payment success message
         function paymentSuccessfully() {
             alert("Payment was successful! Thank you for your payment.");
-            // Update the UI to show payment success message
             document.body.innerHTML = `
                 <h1>Payment Successful!</h1>
                 <p>Thank you for your payment. Your transaction has been completed.</p>
             `;
         }
 
-        // Function to handle payment initiation
-        function initiatePayment() {
+        // Function to generate UPI payment link
+        function generateUPILink() {
             const payeeVPA = "skrohanhsr@axl"; // Replace with your UPI ID
-            const amount = 10; // Payment amount in rupees
-            const transactionRefId = "TXN" + new Date().getTime(); // Unique transaction reference
-            const payeeName = "Your Merchant Name"; // Replace with your business name
-            const note = "Payment for services"; // Note for the transaction
+            const amount = 10; // Amount in INR
+            const transactionRefId = "TXN" + new Date().getTime();
+            const payeeName = "Your Merchant Name"; // Replace with your name or business name
+            const note = "Payment for services";
 
-            // Construct the UPI deep link
-            const upiLink = `upi://pay?pa=${payeeVPA}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}&tr=${transactionRefId}`;
+            return `upi://pay?pa=${payeeVPA}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}&tr=${transactionRefId}`;
+        }
+
+        // Function to initiate payment using UPI link or fallback to QR code
+        function initiatePayment() {
+            const upiLink = generateUPILink();
+
+            // Update user on payment process status
+            startStatusUpdates();
 
             // Try opening the UPI app
             window.location.href = upiLink;
 
-            // Provide feedback to the user about payment status
-            const checkPayment = confirm(
-                "Did you complete the payment? Click 'OK' if payment was successful, or 'Cancel' if it failed."
-            );
-            if (checkPayment) {
-                paymentSuccessfully();
-            } else {
-                alert("Payment failed or was canceled. Please try again.");
-            }
+            // If the UPI app cannot be opened, show QR code
+            setTimeout(() => {
+                stopStatusUpdates();
+                alert("If the UPI app did not open, please scan the QR code to complete the payment.");
+                displayQRCode(upiLink);
+            }, 5000);
         }
 
-        // Attach event listener to the Pay Now button
+        // Function to display QR code
+        function displayQRCode(upiLink) {
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const qrCode = document.getElementById('qrCode');
+            const downloadButton = document.getElementById('downloadButton');
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
+            
+            qrCode.src = qrApiUrl;
+            qrCodeContainer.style.display = 'block';
+
+            // Enable download button
+            downloadButton.style.display = 'inline-block';
+            downloadButton.href = qrApiUrl; // Set QR code URL for download
+        }
+
+        // Function to start status updates
+        function startStatusUpdates() {
+            const statusMessage = document.getElementById('statusMessage');
+            const messages = [
+                "Redirecting to UPI app...",
+                "Please complete your payment in the UPI app.",
+                "Waiting for confirmation...",
+            ];
+            let index = 0;
+
+            statusInterval = setInterval(() => {
+                statusMessage.textContent = messages[index];
+                index = (index + 1) % messages.length;
+            }, 2000); // Rotate messages every 2 seconds
+        }
+
+        // Function to stop status updates
+        function stopStatusUpdates() {
+            clearInterval(statusInterval);
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = "Payment process completed.";
+        }
+
+        // Event listener for Pay Now button
         document.getElementById('payButton').addEventListener('click', initiatePayment);
     </script>
 </body>
