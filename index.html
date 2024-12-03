@@ -3,15 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPI Payment</title>
-    
+    <title>PhonePe Payment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #payButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #payButton:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
-<body onload="notifyPaymentSuccess()">
-    <div>
-    <a href="upi://pay?pa=skrohanhsr@axl&pn=RecipientName&am=20&cu=INR">
-    <button> Payment</button> 
-    </a>
-    <button onclick="confirmPayment()">Confirm Payment</button>
-  </div>
+<body>
+    <h1>Pay with PhonePe</h1>
+    <button id="payButton">Pay Now</button>
+
+    <script>
+        // Function to display a message after a successful payment
+        function paymentSuccessfully() {
+            alert("Payment was successful! Thank you for your payment.");
+            // Update the UI to show payment success message
+            document.body.innerHTML = `
+                <h1>Payment Successful!</h1>
+                <p>Thank you for your payment. Your transaction has been completed.</p>
+            `;
+        }
+
+        // Function to handle payment initiation
+        function initiatePayment() {
+            const payeeVPA = "skrohanhsr@axl"; // Replace with your UPI ID
+            const amount = 10; // Payment amount in rupees
+            const transactionRefId = "TXN" + new Date().getTime(); // Unique transaction reference
+            const payeeName = "Your Merchant Name"; // Replace with your business name
+            const note = "Payment for services"; // Note for the transaction
+
+            // Construct the UPI deep link
+            const upiLink = `upi://pay?pa=${payeeVPA}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}&tr=${transactionRefId}`;
+
+            // Try opening the UPI app
+            window.location.href = upiLink;
+
+            // Provide feedback to the user about payment status
+            const checkPayment = confirm(
+                "Did you complete the payment? Click 'OK' if payment was successful, or 'Cancel' if it failed."
+            );
+            if (checkPayment) {
+                paymentSuccessfully();
+            } else {
+                alert("Payment failed or was canceled. Please try again.");
+            }
+        }
+
+        // Attach event listener to the Pay Now button
+        document.getElementById('payButton').addEventListener('click', initiatePayment);
+    </script>
 </body>
 </html>
