@@ -1,149 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhonePe Payment</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        #payButton {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #payButton:hover {
-            background-color: #45a049;
-        }
-        #statusMessage {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #333;
-        }
-        #qrCodeContainer {
-            display: none;
-            margin-top: 20px;
-        }
-        #qrCodeContainer img {
-            width: 200px;
-            height: 200px;
-        }
-        #downloadButton {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            display: none;
-        }
-        #downloadButton:hover {
-            background-color: #0056b3;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Generator with Message</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f5;
+    }
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+    }
+    #qrcode-container {
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #ffffff;
+      display: inline-block;
+      border: 2px solid #ddd;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    footer {
+      margin-top: 30px;
+      padding: 10px;
+      font-size: 14px;
+      color: #555;
+      background-color: #f9f9f9;
+    }
+    input[type="number"], input[type="text"], button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    input[type="number"], input[type="text"] {
+      width: 200px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #status-message {
+      margin: 10px 0;
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
-    <h1>Pay with PhonePe</h1>
-    <button id="payButton">Pay Now</button>
-    <p id="statusMessage"></p>
+  <header>
+    <h1>QR Code Generator with Message</h1>
+    <p>Generate UPI QR codes with a transaction message.</p>
+  </header>
 
-    <div id="qrCodeContainer">
-        <h2>Scan QR Code</h2>
-        <img id="qrCode" alt="QR Code for Payment">
-        <p>Use any UPI app to scan the QR code and complete the payment.</p>
-        <a id="downloadButton" download="payment_qr_code.png">Download QR Code</a>
-    </div>
+  <div>
+    <input type="number" id="amount" placeholder="Enter amount in INR" min="1" step="0.01">
+    <input type="text" id="message" placeholder="Enter a message" maxlength="50">
+    <button onclick="generateQRCode()">Generate QR Code</button>
+  </div>
 
-    <script>
-        let statusInterval;
+  <div id="status-message"></div>
 
-        // Function to display a payment success message
-        function paymentSuccessfully() {
-            alert("Payment was successful! Thank you for your payment.");
-            document.body.innerHTML = `
-                <h1>Payment Successful!</h1>
-                <p>Thank you for your payment. Your transaction has been completed.</p>
-            `;
+  <div id="qrcode-container">
+    <div id="qrcode"></div>
+  </div>
+
+  <footer>&copy; 2024 QR Code App. Built for convenience and reliability.</footer>
+
+  <script>
+    const upiAddress = "skrohanhsr@axl"; // Replace with your UPI address
+    const recipientName = "RecipientName"; // Replace with your recipient/business name
+
+    function generateQRCode() {
+      const amount = document.getElementById('amount').value.trim();
+      const message = document.getElementById('message').value.trim();
+      const statusMessage = document.getElementById('status-message');
+      const qrCodeDiv = document.getElementById('qrcode');
+
+      // Validate input
+      if (!amount || amount <= 0) {
+        statusMessage.textContent = "Please enter a valid amount.";
+        statusMessage.style.color = "red";
+        return;
+      }
+
+      if (message.length > 50) {
+        statusMessage.textContent = "Message too long. Keep it under 50 characters.";
+        statusMessage.style.color = "red";
+        return;
+      }
+
+      statusMessage.textContent = "Generating QR Code...";
+      statusMessage.style.color = "green";
+
+      // Construct UPI payment URL
+      const upiUrl = `upi://pay?pa=${upiAddress}&pn=${recipientName}&am=${amount}&cu=INR&tn=${encodeURIComponent(message)}`;
+      
+      // Clear any previous QR code
+      qrCodeDiv.innerHTML = "";
+
+      // Generate and display the QR code
+      QRCode.toCanvas(document.createElement('canvas'), upiUrl, { 
+        width: 300, // Larger size for better scanning
+        margin: 4   // Larger margin for easy scanning
+      }, (error, canvas) => {
+        if (error) {
+          console.error("QR code generation error:", error);
+          statusMessage.textContent = "Failed to generate QR Code.";
+          statusMessage.style.color = "red";
+        } else {
+          qrCodeDiv.appendChild(canvas);
+          statusMessage.textContent = "QR Code generated successfully!";
+          statusMessage.style.color = "green";
+          console.log("QR Code generated:", upiUrl);
         }
-
-        // Function to generate UPI payment link
-        function generateUPILink() {
-            const payeeVPA = "skrohanhsr@axl"; // Replace with your UPI ID
-            const amount = 10; // Amount in INR
-            const transactionRefId = "TXN" + new Date().getTime();
-            const payeeName = "Your Merchant Name"; // Replace with your name or business name
-            const note = "Payment for services";
-
-            return `upi://pay?pa=${payeeVPA}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}&tr=${transactionRefId}`;
-        }
-
-        // Function to initiate payment using UPI link or fallback to QR code
-        function initiatePayment() {
-            const upiLink = generateUPILink();
-
-            // Update user on payment process status
-            startStatusUpdates();
-
-            // Try opening the UPI app
-            window.location.href = upiLink;
-
-            // If the UPI app cannot be opened, show QR code
-            setTimeout(() => {
-                stopStatusUpdates();
-                alert("If the UPI app did not open, please scan the QR code to complete the payment.");
-                displayQRCode(upiLink);
-            }, 5000);
-        }
-
-        // Function to display QR code
-        function displayQRCode(upiLink) {
-            const qrCodeContainer = document.getElementById('qrCodeContainer');
-            const qrCode = document.getElementById('qrCode');
-            const downloadButton = document.getElementById('downloadButton');
-            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
-            
-            qrCode.src = qrApiUrl;
-            qrCodeContainer.style.display = 'block';
-
-            // Enable download button
-            downloadButton.style.display = 'inline-block';
-            downloadButton.href = qrApiUrl; // Set QR code URL for download
-        }
-
-        // Function to start status updates
-        function startStatusUpdates() {
-            const statusMessage = document.getElementById('statusMessage');
-            const messages = [
-                "Redirecting to UPI app...",
-                "Please complete your payment in the UPI app.",
-                "Waiting for confirmation...",
-            ];
-            let index = 0;
-
-            statusInterval = setInterval(() => {
-                statusMessage.textContent = messages[index];
-                index = (index + 1) % messages.length;
-            }, 2000); // Rotate messages every 2 seconds
-        }
-
-        // Function to stop status updates
-        function stopStatusUpdates() {
-            clearInterval(statusInterval);
-            const statusMessage = document.getElementById('statusMessage');
-            statusMessage.textContent = "Payment process completed.";
-        }
-
-        // Event listener for Pay Now button
-        document.getElementById('payButton').addEventListener('click', initiatePayment);
-    </script>
+      });
+    }
+  </script>
 </body>
 </html>
