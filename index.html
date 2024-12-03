@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Code Generator with Message</title>
+  <title>UPI Payment with Parallel Messaging</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
   <style>
     body {
@@ -11,7 +11,7 @@
       text-align: center;
       margin: 0;
       padding: 0;
-      background-color: #f0f0f5;
+      background-color: #f9f9f9;
     }
     header {
       background-color: #4CAF50;
@@ -32,7 +32,7 @@
       padding: 10px;
       font-size: 14px;
       color: #555;
-      background-color: #f9f9f9;
+      background-color: #f0f0f0;
     }
     input[type="number"], input[type="text"], button {
       margin: 10px;
@@ -63,14 +63,14 @@
 </head>
 <body>
   <header>
-    <h1>QR Code Generator with Message</h1>
-    <p>Generate UPI QR codes with a transaction message.</p>
+    <h1>UPI Payment with Messaging</h1>
+    <p>Generate UPI QR codes and send messages in parallel.</p>
   </header>
 
   <div>
     <input type="number" id="amount" placeholder="Enter amount in INR" min="1" step="0.01">
     <input type="text" id="message" placeholder="Enter a message" maxlength="50">
-    <button onclick="generateQRCode()">Generate QR Code</button>
+    <button onclick="generatePayment()">Pay and Send Message</button>
   </div>
 
   <div id="status-message"></div>
@@ -79,13 +79,13 @@
     <div id="qrcode"></div>
   </div>
 
-  <footer>&copy; 2024 QR Code App. Built for convenience and reliability.</footer>
+  <footer>&copy; 2024 Payment App. Built for convenience.</footer>
 
   <script>
     const upiAddress = "skrohanhsr@axl"; // Replace with your UPI address
     const recipientName = "RecipientName"; // Replace with your recipient/business name
 
-    function generateQRCode() {
+    function generatePayment() {
       const amount = document.getElementById('amount').value.trim();
       const message = document.getElementById('message').value.trim();
       const statusMessage = document.getElementById('status-message');
@@ -107,10 +107,10 @@
       statusMessage.textContent = "Generating QR Code...";
       statusMessage.style.color = "green";
 
-      // Construct UPI payment URL
+      // Construct UPI payment URL with a transaction note
       const upiUrl = `upi://pay?pa=${upiAddress}&pn=${recipientName}&am=${amount}&cu=INR&tn=${encodeURIComponent(message)}`;
-      
-      // Clear any previous QR code
+
+      // Clear previous QR code
       qrCodeDiv.innerHTML = "";
 
       // Generate and display the QR code
@@ -127,8 +127,22 @@
           statusMessage.textContent = "QR Code generated successfully!";
           statusMessage.style.color = "green";
           console.log("QR Code generated:", upiUrl);
+
+          // Simulate sending a message in parallel
+          sendMessage(message);
         }
       });
+    }
+
+    function sendMessage(message) {
+      // Simulate sending a message via an API or service
+      console.log("Sending message:", message);
+
+      // Simulate an API call with a delay
+      setTimeout(() => {
+        alert("Message sent: " + message);
+        console.log("Message sent successfully!");
+      }, 1000);
     }
   </script>
 </body>
